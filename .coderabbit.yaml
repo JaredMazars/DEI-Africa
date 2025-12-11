@@ -1,0 +1,78 @@
+# CodeRabbit Configuration
+# Learn more at: https://docs.coderabbit.ai/guides/configure-coderabbit
+
+# Language settings
+language: en-US
+
+# Review settings
+reviews:
+  # Enable automatic reviews on pull requests
+  auto_review:
+    enabled: true
+    
+  # Review levels
+  profile: chill # Options: chill, assertive
+  
+  # Request changes for high severity issues
+  request_changes_workflow: true
+  
+  # Code quality checks
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  
+  # Auto-approve specific file types
+  auto_approve:
+    enabled: false
+
+# Path filters - specify which paths to review
+path_filters:
+  - "src/**"
+  - "server/**"
+  - "!**/node_modules/**"
+  - "!**/dist/**"
+  - "!**/build/**"
+  - "!**/*.min.js"
+  - "!**/*.lock"
+
+# Ignore patterns
+path_instructions:
+  - path: "**/*.test.ts"
+    instructions: "Focus on test coverage and edge cases"
+  - path: "**/*.tsx"
+    instructions: "Check for React best practices, accessibility, and performance"
+  - path: "server/**/*.js"
+    instructions: "Review security vulnerabilities, SQL injection risks, and authentication logic"
+
+# Review guidelines
+review_guidelines:
+  - "Check for security vulnerabilities and authentication issues"
+  - "Verify proper error handling and input validation"
+  - "Look for performance optimization opportunities"
+  - "Ensure TypeScript types are properly defined"
+  - "Check accessibility compliance (WCAG 2.1)"
+  - "Review React hooks usage and potential memory leaks"
+  - "Verify database queries are optimized"
+  - "Check for hardcoded credentials or sensitive data"
+
+# Chat settings
+chat:
+  auto_reply: true
+
+# Enable specific checks
+checks:
+  # Security scanning
+  security_scan: true
+  
+  # Code quality
+  code_quality: true
+  
+  # Performance analysis
+  performance: true
+  
+  # Best practices
+  best_practices: true
+  
+  # Accessibility
+  accessibility: true
