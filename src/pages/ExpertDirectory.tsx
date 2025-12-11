@@ -858,7 +858,7 @@ const ExpertDirectory: React.FC = () => {
                           <div className="flex items-center space-x-1">
                             <Users className="w-4 h-4 text-blue-600" />
                             <span className={isFull ? 'text-red-600 font-medium' : ''}>
-                              {webinar.attendees}/{webinar.maxAttendees} registered
+                              {webinar.attendees}/{webinar.maxAttendees} setRegisteredWebinarss
                             </span>
                           </div>
                           <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
