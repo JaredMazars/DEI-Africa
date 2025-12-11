@@ -1,0 +1,139 @@
+import { executeQuery } from '../config/database.js';
+
+class Session {
+    constructor(data) {
+        this.session_id = data.session_id;
+        this.connection_id = data.connection_id;
+        this.title = data.title;
+        this.description = data.description;
+        this.scheduled_at = data.scheduled_at;
+        this.duration_minutes = data.duration_minutes;
+        this.status = data.status;
+        this.meeting_link = data.meeting_link;
+        this.notes = data.notes;
+        this.created_at = data.created_at;
+        this.updated_at = data.updated_at;
+    }
+
+    static async create(sessionData) {
+        try {
+            const query = `
+                INSERT INTO Sessions (connection_id, title, description, scheduled_at, duration_minutes, status, meeting_link, created_at, updated_at)
+                OUTPUT INSERTED.*
+                VALUES ('${sessionData.connection_id}', '${sessionData.title}', 
+                        ${sessionData.description ? `'${sessionData.description.replace(/'/g, "''")}'` : 'NULL'}, 
+                        '${sessionData.scheduled_at}', ${sessionData.duration_minutes || 60}, 'scheduled', 
+                        ${sessionData.meeting_link ? `'${sessionData.meeting_link}'` : 'NULL'}, 
+                        GETDATE(), GETDATE())
+            `;
+            
+            const result = await executeQuery(query);
+            return new Session(result.recordset[0]);
+        } catch (error) {
+            console.error('Error creating session:', error);
+            throw error;
+        }
+    }
+
+    static async findById(sessionId) {
+        try {
+            const query = `SELECT * FROM Sessions WHERE session_id = '${sessionId}'`;
+            const result = await executeQuery(query);
+            
+            return result.recordset.length > 0 ? new Session(result.recordset[0]) : null;
+        } catch (error) {
+            console.error('Error finding session by ID:', error);
+            throw error;
+        }
+    }
+
+    static async getUserSessions(userId) {
+        try {
+            const query = `
+                SELECT s.*, c.mentor_id, c.mentee_id,
+                       mentor_profile.name as mentor_name, 
+                       mentor_profile.profile_image_url as mentor_avatar,
+                       mentee_profile.name as mentee_name, 
+                       mentee_profile.profile_image_url as mentee_avatar
+                FROM Sessions s
+                INNER JOIN Connections c ON s.connection_id = c.connection_id
+                LEFT JOIN UserProfiles mentor_profile ON c.mentor_id = mentor_profile.user_id
+                LEFT JOIN UserProfiles mentee_profile ON c.mentee_id = mentee_profile.user_id
+                WHERE c.mentor_id = '${userId}' OR c.mentee_id = '${userId}'
+                ORDER BY s.scheduled_at ASC
+            `;
+            
+            const result = await executeQuery(query);
+            return result.recordset.map(session => new Session(session));
+        } catch (error) {
+            console.error('Error getting user sessions:', error);
+            throw error;
+        }
+    }
+
+    static async getUpcomingSessions(userId) {
+        try {
+            const query = `
+                SELECT s.*, c.mentor_id, c.mentee_id,
+                       mentor_profile.name as mentor_name, 
+                       mentor_profile.profile_image_url as mentor_avatar,
+                       mentee_profile.name as mentee_name, 
+                       mentee_profile.profile_image_url as mentee_avatar
+                FROM Sessions s
+                INNER JOIN Connections c ON s.connection_id = c.connection_id
+                LEFT JOIN UserProfiles mentor_profile ON c.mentor_id = mentor_profile.user_id
+                LEFT JOIN UserProfiles mentee_profile ON c.mentee_id = mentee_profile.user_id
+                WHERE (c.mentor_id = '${userId}' OR c.mentee_id = '${userId}')
+                AND s.scheduled_at > GETDATE()
+                AND s.status = 'scheduled'
+                ORDER BY s.scheduled_at ASC
+            `;
+            
+            const result = await executeQuery(query);
+            return result.recordset.map(session => new Session(session));
+        } catch (error) {
+            console.error('Error getting upcoming sessions:', error);
+            throw error;
+        }
+    }
+
+    static async updateStatus(sessionId, status, notes = null) {
+        try {
+            const query = `
+                UPDATE Sessions 
+                SET status = '${status}', 
+                    notes = ${notes ? `'${notes.replace(/'/g, "''")}'` : 'NULL'}, 
+                    updated_at = GETDATE()
+                OUTPUT INSERTED.*
+                WHERE session_id = '${sessionId}'
+            `;
+            
+            const result = await executeQuery(query);
+            return result.recordset.length > 0 ? new Session(result.recordset[0]) : null;
+        } catch (error) {
+            console.error('Error updating session status:', error);
+            throw error;
+        }
+    }
+
+    static async getSessionStats() {
+        try {
+            const query = `
+                SELECT 
+                    COUNT(*) as total_sessions,
+                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_sessions,
+                    SUM(CASE WHEN status = 'scheduled' AND scheduled_at > GETDATE() THEN 1 ELSE 0 END) as upcoming_sessions,
+                    AVG(CAST(duration_minutes as FLOAT)) as avg_duration
+                FROM Sessions
+            `;
+            
+            const result = await executeQuery(query);
+            return result.recordset[0];
+        } catch (error) {
+            console.error('Error getting session stats:', error);
+            throw error;
+        }
+    }
+}
+
+export default Session;

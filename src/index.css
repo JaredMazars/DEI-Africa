@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Forvis Mazars Brand Colors - Modern Professional Theme */
+:root {
+  /* Primary Navy - Forvis Mazars signature color */
+  --forvis-navy: #1e3a8a;
+  --forvis-navy-light: #3b82f6;
+  --forvis-navy-dark: #1e40af;
+  
+  /* Secondary Teal - Modern accent */
+  --forvis-teal: #0d9488;
+  --forvis-teal-light: #14b8a6;
+  
+  /* Professional Grays */
+  --forvis-gray-50: #f9fafb;
+  --forvis-gray-100: #f3f4f6;
+  --forvis-gray-600: #4b5563;
+  --forvis-gray-900: #111827;
+  
+  /* Accent Colors */
+  --forvis-accent: #0ea5e9;
+  --forvis-success: #10b981;
+}
+
+/* Global Forvis Mazars Typography */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: var(--forvis-gray-900);
+  background-color: var(--forvis-gray-50);
+}
+
+/* Professional Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--forvis-navy);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* Forvis Mazars Button Styles */
+.btn-forvis-primary {
+  background-color: var(--forvis-navy);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-forvis-primary:hover {
+  background-color: var(--forvis-navy-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+}
+
+.btn-forvis-secondary {
+  background-color: var(--forvis-teal);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-forvis-secondary:hover {
+  background-color: var(--forvis-teal-light);
+}
+
+/* Card Styles with Forvis Mazars branding */
+.card-forvis {
+  background: white;
+  border: 1px solid var(--forvis-gray-100);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.card-forvis:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--forvis-navy-light);
+}
+
+/* Professional Link Styles */
+a {
+  color: var(--forvis-navy);
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--forvis-navy-light);
+}
+
+/* Modern Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Professional Focus States */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--forvis-navy);
+  ring-color: var(--forvis-navy);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
