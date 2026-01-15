@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
@@ -7,39 +7,40 @@ import {
   MessageSquare, 
   Calendar, 
   User, 
-  LogOut, 
-  Building2,
-  Search,
   Bell,
   Settings,
-  ChevronDown,
   Briefcase,
   Target,
-  Award
+  Award,
+  LogOut,
+  Trophy
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useNotifications } from '../contexts/NotificationContext';
+import { useSimpleAuth } from '../contexts/SimpleAuthContext';
+import NotificationCenter from './NotificationCenter';
 
 const Navigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { logout } = useSimpleAuth();
+  const { unreadCount } = useNotifications();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate('/login');
   };
 
   const navigationItems = [
     { path: '/home', icon: Home, label: 'Home' },
-    { path: '/dashboard', icon: Target, label: 'Dashboard' },
+    // { path: '/dashboard', icon: Target, label: 'Dashboard' },
     { path: '/mentors', icon: Users, label: 'Mentor Discovery' },
     { path: '/experts', icon: Award, label: 'Expert Directory' },
     { path: '/collaboration', icon: Briefcase, label: 'Collaboration Hub' },
     { path: '/resources', icon: BookOpen, label: 'Resource Library' },
     { path: '/discussion', icon: MessageSquare, label: 'Discussion' },
     { path: '/calendar', icon: Calendar, label: 'Calendar' },
-    { path: '/preferences', icon: Settings, label: 'Preferences' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -99,9 +100,16 @@ const Navigation = () => {
             </div> */}
 
             {/* Notifications */}
-            <button className="relative p-2.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+            <button 
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative p-2.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold px-1">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
 
             {/* Profile Dropdown */}
@@ -110,25 +118,28 @@ const Navigation = () => {
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                 className="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <div 
+                  data-profile-icon
+                  className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center"
+                >
                   <span className="text-blue-600 font-medium text-sm">
-                    {user?.profile?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                    U
                   </span>
                 </div>
                 <div className="hidden sm:block text-left">
                   <div className="text-sm font-medium text-gray-900">
-                    {user?.profile?.name || 'User'}
+                    User
                   </div>
                   <div className="text-xs text-gray-500">
-                    {user?.profile?.role === 'mentor' ? 'Mentor' : 'Mentee'}
+                    Mentee
                   </div>
                 </div>
-                <ChevronDown className="w-4 h-4 text-gray-400" />
+                <Settings className="w-4 h-4 text-gray-400" />
               </button>
 
               {/* Dropdown Menu */}
               {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
                   <Link
                     to="/profile"
                     className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -138,16 +149,35 @@ const Navigation = () => {
                     <span>Profile</span>
                   </Link>
                   <Link
-                    to="/settings"
+                    to="/mentorship-activities"
+                    className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setShowProfileMenu(false)}
+                  >
+                    <Trophy className="w-4 h-4 text-blue-600" />
+                    <span>My Mentors</span>
+                  </Link>
+                  <Link
+                    to="/my-mentees"
+                    className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setShowProfileMenu(false)}
+                  >
+                    <Users className="w-4 h-4 text-blue-600" />
+                    <span>My Mentees</span>
+                  </Link>
+                  <Link
+                    to="/preferences"
                     className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => setShowProfileMenu(false)}
                   >
                     <Settings className="w-4 h-4" />
-                    <span>Settings</span>
+                    <span>Preferences</span>
                   </Link>
-                  <hr className="my-1" />
+                  <hr className="my-1 border-gray-200" />
                   <button
-                    onClick={handleLogout}
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      handleLogout();
+                    }}
                     className="flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
                   >
                     <LogOut className="w-4 h-4" />
@@ -190,6 +220,12 @@ const Navigation = () => {
           onClick={() => setShowProfileMenu(false)}
         />
       )}
+
+      {/* Notification Center */}
+      <NotificationCenter 
+        isOpen={showNotifications} 
+        onClose={() => setShowNotifications(false)} 
+      />
     </nav>
   );
 };

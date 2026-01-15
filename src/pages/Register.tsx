@@ -31,8 +31,23 @@ const Register: React.FC = () => {
     setError('');
     
     try {
-      await register(email, password);
-      navigate('/onboarding');
+      // Direct API call to registration endpoint
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('✅ Registration successful! Check your email at ' + email + ' for verification link!');
+        navigate('/login');
+      } else {
+        setError(data.message || 'Registration failed');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred. Please try again.');
     } finally {

@@ -212,7 +212,7 @@ export function Dashboard() {
             {adminAnalytics.userMetrics.usersByCountry.slice(0, 5).map((country, index) => (
               <div key={country.country} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${index === 0 ? 'bg-blue-600' : index === 1 ? 'bg-green-600' : index === 2 ? 'bg-yellow-600' : index === 3 ? 'bg-purple-600' : 'bg-gray-600'}`}></div>
+                  <div className={`w-3 h-3 rounded-full ${index === 0 ? 'bg-blue-600' : index === 1 ? 'bg-green-600' : index === 2 ? 'bg-yellow-600' : index === 3 ? 'bg-blue-600' : 'bg-gray-600'}`}></div>
                   <span className="text-sm font-medium text-gray-900">{country.country}</span>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -373,9 +373,9 @@ export function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Premium Users</p>
-              <p className="text-2xl font-bold text-purple-600">{adminAnalytics.userMetrics.premiumUsers}</p>
+              <p className="text-2xl font-bold text-blue-600">{adminAnalytics.userMetrics.premiumUsers}</p>
             </div>
-            <Star className="w-8 h-8 text-purple-600" />
+            <Star className="w-8 h-8 text-blue-600" />
           </div>
         </div>
       </div>
@@ -516,9 +516,9 @@ export function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Success Rate</p>
-              <p className="text-2xl font-bold text-purple-600">87%</p>
+              <p className="text-2xl font-bold text-blue-600">87%</p>
             </div>
-            <TrendingUp className="w-8 h-8 text-purple-600" />
+            <TrendingUp className="w-8 h-8 text-blue-600" />
           </div>
         </div>
       </div>
@@ -648,9 +648,9 @@ export function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Response Rate</p>
-              <p className="text-2xl font-bold text-purple-600">88%</p>
+              <p className="text-2xl font-bold text-blue-600">88%</p>
             </div>
-            <TrendingUp className="w-8 h-8 text-purple-600" />
+            <TrendingUp className="w-8 h-8 text-blue-600" />
           </div>
         </div>
       </div>
@@ -780,9 +780,9 @@ export function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Deal Value</p>
-              <p className="text-2xl font-bold text-purple-600">${(adminAnalytics.collaborationMetrics.totalDealValue / 1000000).toFixed(1)}M</p>
+              <p className="text-2xl font-bold text-blue-600">${(adminAnalytics.collaborationMetrics.totalDealValue / 1000000).toFixed(1)}M</p>
             </div>
-            <DollarSign className="w-8 h-8 text-purple-600" />
+            <DollarSign className="w-8 h-8 text-blue-600" />
           </div>
         </div>
       </div>
@@ -802,7 +802,7 @@ export function Dashboard() {
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium text-gray-900">{sector.sector}</h4>
                 <span className={`w-3 h-3 rounded-full ${
-                  index === 0 ? 'bg-blue-600' : index === 1 ? 'bg-green-600' : index === 2 ? 'bg-yellow-600' : 'bg-purple-600'
+                  index === 0 ? 'bg-blue-600' : index === 1 ? 'bg-green-600' : index === 2 ? 'bg-yellow-600' : 'bg-blue-600'
                 }`}></span>
               </div>
               <div className="space-y-1">

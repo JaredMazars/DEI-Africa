@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { Settings, Save, RefreshCw, Target, MapPin, Clock, Languages, Briefcase, User } from 'lucide-react';
 import { authAPI } from '../services/api';
 
@@ -47,16 +46,25 @@ const languageOptions = [
 ];
 
 const Preferences: React.FC = () => {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  
+  // Hardcoded user data
+  const user = {
+    profile: {
+      interests: ['Technology', 'Business'],
+      location: 'South Africa',
+      languages: ['English']
+    }
+  };
+  
   const [preferences, setPreferences] = useState<UserPreferences>({
     mentorPreferences: {
-      preferredExpertise: user?.profile?.interests || [],
-      preferredLocation: user?.profile?.location ? [user.profile.location] : [],
+      preferredExpertise: user.profile.interests || [],
+      preferredLocation: user.profile.location ? [user.profile.location] : [],
       preferredExperience: [],
-      preferredLanguages: user?.profile?.languages || ['English'],
+      preferredLanguages: user.profile.languages || ['English'],
       sessionFrequency: '1-2 sessions/week',
       communicationStyle: 'structured'
     },

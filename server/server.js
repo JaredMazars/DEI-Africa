@@ -91,21 +91,23 @@ app.use((error, req, res, next) => {
 // Database connection test and server start
 const startServer = async () => {
     try {
-        // Test database connection (optional - will run in demo mode if unavailable)
-        try {
-            await getConnection();
-            console.log('✅ Database connected successfully');
-        } catch (dbError) {
-            console.warn('⚠️  Database connection unavailable - running in DEMO MODE');
-            console.warn('   Use /api/auth/demo-login endpoint to login without database');
-        }
+        // Test database connection
+        console.log('🔌 Testing database connection...');
+        const pool = await getConnection();
+        console.log('✅ Database connected successfully!');
+        
+        // Query all users to prove connection
+        const result = await pool.request().query('SELECT user_id, email, full_name, role, created_at FROM Users');
+        console.log(`\n📊 Found ${result.recordset.length} users in database:`);
+        console.table(result.recordset);
         
         // Start server
         app.listen(PORT, () => {
-            console.log(`🚀 One Africa Hub API server running on port ${PORT}`);
+            console.log(`\n🚀 One Africa Hub API server running on port ${PORT}`);
             console.log(`📊 Health check: http://localhost:${PORT}/health`);
             console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
             console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+            console.log(`✉️  Email service ready for testing`);
         });
         
     } catch (error) {
