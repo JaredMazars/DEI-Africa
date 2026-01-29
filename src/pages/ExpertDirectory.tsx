@@ -8,6 +8,7 @@ interface Expert {
   name: string;
   title: string;
   company: string;
+  email: string;
   avatar: string;
   location: string;
   country: string;
@@ -185,12 +186,52 @@ const ExpertDirectory: React.FC = () => {
   // Scheduled meetings state
   const [scheduledMeetings, setScheduledMeetings] = useState<ScheduledMeeting[]>(() => {
     const saved = localStorage.getItem('scheduledMeetings');
-    return saved ? JSON.parse(saved) : [];
+    const meetings = saved ? JSON.parse(saved) : [];
+    
+    // Add test meeting with attendees if not already present
+    const hasTestMeeting = meetings.some((m: ScheduledMeeting) => m.title === 'Test Meeting with Attendees - AI Integration Demo');
+    
+    if (!hasTestMeeting) {
+      const testMeetingDate = new Date('2026-01-25T15:00:00');
+      const startTime = testMeetingDate.toISOString();
+      const endTime = new Date(testMeetingDate.getTime() + 60 * 60 * 1000).toISOString();
+      
+      const teamsParams = new URLSearchParams();
+      teamsParams.append('subject', 'Test Meeting with Attendees - AI Integration Demo');
+      teamsParams.append('content', 'This is a test meeting to demonstrate the attendee feature working correctly. Topics include AI integration in African financial services.');
+      teamsParams.append('startTime', startTime);
+      teamsParams.append('endTime', endTime);
+      teamsParams.append('attendees', 'testuser.demo@gmail.com,sarah.johnson@forvismazars.com,michael.chen@forvismazars.com');
+      
+      const testMeeting: ScheduledMeeting = {
+        id: `meeting-test-${Date.now()}`,
+        title: 'Test Meeting with Attendees - AI Integration Demo',
+        description: 'This is a test meeting to demonstrate the attendee feature working correctly. Topics include AI integration in African financial services, digital transformation, and cross-border payment systems.',
+        date: '2026-01-25',
+        time: '15:00',
+        startDateTime: startTime,
+        endDateTime: endTime,
+        topic: 'Digital Transformation',
+        region: 'Pan-African',
+        expert: 'Amara Okafor',
+        attendees: ['testuser.demo@gmail.com', 'sarah.johnson@forvismazars.com', 'michael.chen@forvismazars.com'],
+        lobbyBypass: 'organization',
+        teamsLink: `https://teams.microsoft.com/l/meeting/new?${teamsParams.toString()}`,
+        createdAt: new Date().toISOString(),
+        createdBy: 'System Test'
+      };
+      
+      meetings.push(testMeeting);
+      localStorage.setItem('scheduledMeetings', JSON.stringify(meetings));
+    }
+    
+    return meetings;
   });
   const [showMeetingsList, setShowMeetingsList] = useState(false);
 
   // Platform users for email invitations (dummy data)
   const platformUsers: PlatformUser[] = [
+    { id: 'test-gmail', name: 'Test User Gmail', email: 'testuser.demo@gmail.com', avatar: 'https://i.pravatar.cc/150?img=99', role: 'Test User', organization: 'Gmail' },
     { id: '1', name: 'Sarah Johnson', email: 'sarah.johnson@forvismazars.com', avatar: 'https://i.pravatar.cc/150?img=1', role: 'Senior Consultant', organization: 'Forvis Mazars' },
     { id: '2', name: 'Michael Chen', email: 'michael.chen@forvismazars.com', avatar: 'https://i.pravatar.cc/150?img=2', role: 'Manager', organization: 'Forvis Mazars' },
     { id: '3', name: 'Aisha Patel', email: 'aisha.patel@forvismazars.com', avatar: 'https://i.pravatar.cc/150?img=3', role: 'Director', organization: 'Forvis Mazars' },
@@ -222,23 +263,70 @@ const ExpertDirectory: React.FC = () => {
     }
   };
 
+  // Open Teams chat with expert
+  const openTeamsChat = (expert: any) => {
+    try {
+      // Method 1: Direct Teams deeplink (if email is available)
+      if (expert.email) {
+        const teamsDeepLink = `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(expert.email)}&topicName=${encodeURIComponent(`Chat with ${expert.name}`)}`;
+        window.open(teamsDeepLink, '_blank');
+      } else if (expert.name) {
+        // Fallback: Search for expert by name in Teams
+        const teamsSearchUrl = `https://teams.microsoft.com/l/search?q=${encodeURIComponent(expert.name)}`;
+        window.open(teamsSearchUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Error opening Teams chat:', error);
+      // Fallback: Direct user to Teams web
+      window.open('https://teams.microsoft.com', '_blank');
+    }
+  };
+
   // Add email to invited list
   const addInvitedEmail = (email: string) => {
-    if (email && !newWebinar.invitedEmails.includes(email)) {
-      setNewWebinar({
-        ...newWebinar,
-        invitedEmails: [...newWebinar.invitedEmails, email]
-      });
-      setEmailInput('');
-      setShowSuggestions(false);
+    console.log('🔵 addInvitedEmail called with:', email);
+    
+    if (!email || email.trim() === '') {
+      console.warn('⚠️ Email is empty!');
+      return;
     }
+
+    // Use callback form of setState to get fresh state
+    setNewWebinar((prevWebinar) => {
+      console.log('Previous invitedEmails:', prevWebinar.invitedEmails);
+      
+      if (prevWebinar.invitedEmails.includes(email)) {
+        console.warn('⚠️ Email already exists in invitedEmails:', email);
+        return prevWebinar;
+      }
+      
+      const updatedEmails = [...prevWebinar.invitedEmails, email];
+      console.log('✅ Adding email. Updated emails:', updatedEmails);
+      
+      return {
+        ...prevWebinar,
+        invitedEmails: updatedEmails
+      };
+    });
+    
+    setEmailInput('');
+    setShowSuggestions(false);
   };
 
   // Remove email from invited list
   const removeInvitedEmail = (email: string) => {
-    setNewWebinar({
-      ...newWebinar,
-      invitedEmails: newWebinar.invitedEmails.filter(e => e !== email)
+    console.log('🔴 removeInvitedEmail called for:', email);
+    
+    setNewWebinar((prevWebinar) => {
+      console.log('Current invitedEmails before removal:', prevWebinar.invitedEmails);
+      
+      const updatedEmails = prevWebinar.invitedEmails.filter(e => e !== email);
+      console.log('Updated emails after removal:', updatedEmails);
+      
+      return {
+        ...prevWebinar,
+        invitedEmails: updatedEmails
+      };
     });
   };
 
@@ -333,6 +421,7 @@ const ExpertDirectory: React.FC = () => {
       name: 'Amara Okafor',
       title: 'Tax & Regulatory Expert',
       company: 'Forvis Mazars',
+      email: 'Walter.Blake@forvismazars.com',
       avatar: 'https://images.pexels.com/photos/3778966/pexels-photo-3778966.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
       location: 'Lagos, Nigeria',
       country: 'Nigeria',
@@ -351,6 +440,7 @@ const ExpertDirectory: React.FC = () => {
       name: 'Thabo Mthembu',
       title: 'ESG & Sustainability Advisor',
       company: 'Forvis Mazars',
+      email: 'thabo.mthembu@forvismzars.com',
       avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
       location: 'Johannesburg, South Africa',
       country: 'South Africa',
@@ -369,6 +459,7 @@ const ExpertDirectory: React.FC = () => {
       name: 'Kemi Adebayo',
       title: 'Fintech & Digital Banking Specialist',
       company: 'Forvis Mazars',
+      email: 'kemi.adebayo@forvismzars.com',
       avatar: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
       location: 'Nairobi, Kenya',
       country: 'Kenya',
@@ -387,6 +478,7 @@ const ExpertDirectory: React.FC = () => {
       name: 'Fatima El-Sayed',
       title: 'Audit & Assurance Partner',
       company: 'Forvis Mazars',
+      email: 'fatima.elsayed@forvismzars.com',
       avatar: 'https://images.pexels.com/photos/3776164/pexels-photo-3776164.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
       location: 'Cairo, Egypt',
       country: 'Egypt',
@@ -405,6 +497,7 @@ const ExpertDirectory: React.FC = () => {
       name: 'Kwame Asante',
       title: 'M&A Advisory Specialist',
       company: 'Forvis Mazars',
+      email: 'kwame.asante@forvismzars.com',
       avatar: 'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
       location: 'Accra, Ghana',
       country: 'Ghana',
@@ -423,6 +516,7 @@ const ExpertDirectory: React.FC = () => {
       name: 'Nia Banda',
       title: 'HR & Talent Development Consultant',
       company: 'Forvis Mazars',
+      email: 'nia.banda@forvismzars.com',
       avatar: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
       location: 'Lusaka, Zambia',
       country: 'Zambia',
@@ -454,6 +548,7 @@ const ExpertDirectory: React.FC = () => {
           name: expert.name,
           title: expert.specializations?.split(',')[0] || 'Expert',
           company: 'Forvis Mazars',
+          email: expert.email || `${expert.name.toLowerCase().replace(/\s+/g, '.')}@forvismzars.com`,
           avatar: expert.profile_image_url || 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
           location: expert.location,
           country: expert.location?.split(',')[1]?.trim() || expert.location,
@@ -829,6 +924,11 @@ const ExpertDirectory: React.FC = () => {
   };
 
   const handleScheduleWebinar = () => {
+    console.log('=== SCHEDULE WEBINAR INITIATED ===');
+    console.log('Current newWebinar state:', newWebinar);
+    console.log('Invited emails:', newWebinar.invitedEmails);
+    console.log('Number of invitees:', newWebinar.invitedEmails.length);
+    
     if (newWebinar.title && newWebinar.date && newWebinar.time && newWebinar.topic && newWebinar.region && newWebinar.expert) {
       // Generate Microsoft Teams meeting link with parameters
       // Combine date and time into ISO format
@@ -837,15 +937,25 @@ const ExpertDirectory: React.FC = () => {
       const endTime = new Date(dateTime.getTime() + 60 * 60 * 1000).toISOString(); // 1 hour duration
       
       // Build Teams URL with all parameters including attendees
+      // Use direct Teams meeting compose URL format
       const teamsParams = new URLSearchParams();
       teamsParams.append('subject', newWebinar.title);
       teamsParams.append('content', newWebinar.description || `Join us for: ${newWebinar.title}`);
       teamsParams.append('startTime', startTime);
       teamsParams.append('endTime', endTime);
-      if (newWebinar.invitedEmails.length > 0) {
-        teamsParams.append('attendees', newWebinar.invitedEmails.join(','));
+      
+      console.log('Before adding people param - Invited emails:', newWebinar.invitedEmails);
+      
+      if (newWebinar.invitedEmails && newWebinar.invitedEmails.length > 0) {
+        // Use comma-separated list for attendees parameter in Teams compose URL
+        const attendeesString = newWebinar.invitedEmails.join(',');
+        console.log('Adding attendees param with:', attendeesString);
+        teamsParams.append('attendees', attendeesString);
+      } else {
+        console.warn('⚠️ No invited emails found!');
       }
       
+      // Use the Teams compose meeting URL format which better supports pre-filling attendees
       const teamsLink = `https://teams.microsoft.com/l/meeting/new?${teamsParams.toString()}`;
       
       // Create meeting record to store
@@ -877,8 +987,12 @@ const ExpertDirectory: React.FC = () => {
       console.log('Teams Link:', teamsLink);
       console.log('Number of attendees:', newWebinar.invitedEmails.length);
       console.log('Attendees array:', newWebinar.invitedEmails);
-      console.log('Attendees joined:', newWebinar.invitedEmails.join(','));
+      console.log('Attendees joined with comma:', newWebinar.invitedEmails.join(','));
       console.log('Full params:', teamsParams.toString());
+      console.log('Meeting Record:', meetingRecord);
+      console.log('');
+      console.log('📋 COPY THIS URL TO TEST:');
+      console.log(teamsLink);
       console.log('========================');
       
       // Open Teams in new tab to create the meeting
@@ -1014,7 +1128,7 @@ const ExpertDirectory: React.FC = () => {
                 )}
               </span>
             </button>
-            <button
+            {/* <button
               onClick={() => setActiveTab('forum')}
               className={`pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'forum'
@@ -1023,7 +1137,7 @@ const ExpertDirectory: React.FC = () => {
               }`}
             >
               Ask the Expert
-            </button>
+            </button> */}
             
             {/* Expert-only tabs */}
             {isExpert && (
@@ -1296,8 +1410,8 @@ const ExpertDirectory: React.FC = () => {
           <div className="p-8 overflow-y-auto h-full">
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">My Experts & Conversations</h2>
-                <p className="text-gray-600 mt-1">Manage your connected experts and ongoing conversations</p>
+                <h2 className="text-2xl font-bold text-gray-900">My Experts - Microsoft Teams</h2>
+                <p className="text-gray-600 mt-1">Click on an expert to open a chat with them in Microsoft Teams</p>
               </div>
             </div>
 
@@ -1314,335 +1428,85 @@ const ExpertDirectory: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Connected Experts List */}
-                <div className="lg:col-span-1 space-y-4">
-                  <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Connected Experts ({connectedExperts.length})</h3>
-                  {connectedExperts.map((expert) => {
-                    const messageCount = expertConversations[expert.id]?.length || 0;
-                    const lastMessage = expertConversations[expert.id]?.[expertConversations[expert.id].length - 1];
-                    
-                    return (
-                      <div
-                        key={expert.id}
-                        onClick={() => setSelectedExpert(expert)}
-                        className={`bg-white border rounded-xl p-4 cursor-pointer transition-all hover:shadow-md ${
-                          selectedExpert?.id === expert.id ? 'border-blue-500 shadow-md' : 'border-gray-200'
-                        }`}
-                      >
-                        <div className="flex items-start space-x-3">
-                          <div className="relative">
-                            <img
-                              src={expert.avatar}
-                              alt={expert.name}
-                              className="w-12 h-14 rounded-lg object-cover object-top"
-                              style={{ aspectRatio: '4/5' }}
-                            />
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 text-sm truncate">{expert.name}</h4>
-                            <p className="text-xs text-gray-500 truncate">{expert.title}</p>
-                            {lastMessage && (
-                              <p className="text-xs text-gray-400 mt-1 truncate">{lastMessage.preview}</p>
-                            )}
-                          </div>
-                          {messageCount > 0 && (
-                            <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold flex-shrink-0">
-                              {messageCount}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {connectedExperts.map((expert) => (
+                  <div
+                    key={expert.id}
+                    className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all"
+                  >
+                    {/* Expert Card Header */}
+                    <div className="relative h-32">
+                      <div className="absolute inset-0 opacity-10" style={{
+                        backgroundImage: 'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="20" cy="20" r="15" stroke="white" stroke-width="2"/%3E%3C/svg%3E")',
+                        backgroundRepeat: 'repeat'
+                      }}></div>
+                    </div>
+
+                    {/* Expert Avatar & Info */}
+                    <div className="px-6 pb-6">
+                      <div className="flex flex-col items-center -mt-16 mb-4">
+                        <img
+                          src={expert.avatar}
+                          alt={expert.name}
+                          className="w-24 h-32 rounded-lg object-cover object-top border-4 border-white shadow-lg"
+                          style={{ aspectRatio: '3/4' }}
+                        />
+                        <div className="mt-4 text-center flex-1">
+                          <h3 className="text-lg font-bold text-gray-900">{expert.name}</h3>
+                          <p className="text-sm text-gray-600">{expert.title}</p>
+                          <p className="text-xs text-gray-500 mt-1">{expert.company}</p>
+                        </div>
+                      </div>
+
+                      {/* Rating */}
+                      <div className="flex items-center justify-center space-x-2 mb-4 pb-4 border-b border-gray-200">
+                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                        <span className="font-semibold text-gray-900">{expert.rating}</span>
+                        <span className="text-sm text-gray-500">({expert.reviewCount} reviews)</span>
+                      </div>
+
+                      {/* Expertise Tags */}
+                      <div className="mb-4">
+                        <div className="flex flex-wrap gap-2">
+                          {expert.expertise.slice(0, 2).map((skill, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                          {expert.expertise.length > 2 && (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
+                              +{expert.expertise.length - 2} more
                             </span>
                           )}
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
 
-                {/* Conversation Panel */}
-                <div className="lg:col-span-2">
-                  {selectedExpert ? (
-                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden h-[600px] flex flex-col">
-                      {/* Conversation Header */}
-                      <div className="border-b border-gray-200 p-4 bg-gradient-to-r from-blue-50 to-white">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <img
-                              src={selectedExpert.avatar}
-                              alt={selectedExpert.name}
-                              className="w-12 h-14 rounded-lg object-cover object-top"
-                              style={{ aspectRatio: '4/5' }}
-                            />
-                            <div>
-                              <h3 className="font-bold text-gray-900">{selectedExpert.name}</h3>
-                              <p className="text-sm text-gray-600">{selectedExpert.title}</p>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                <span className="text-xs text-gray-500">Active now</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                              <Video className="w-5 h-5" />
-                            </button>
-                            <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                              <Calendar className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      {/* Microsoft Teams Chat Button */}
+                      <button
+                        onClick={() => openTeamsChat(expert)}
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                      >
+                        <MessageCircle className="w-5 h-5" />
+                        <span>Chat on Teams</span>
+                      </button>
 
-                      {/* Messages */}
-                      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
-                        {expertConversations[selectedExpert.id]?.length > 0 ? (
-                          expertConversations[selectedExpert.id].map((message: any, index: number) => (
-                            <div
-                              key={index}
-                              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                            >
-                              <div className={`max-w-[70%] ${message.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-900'} rounded-2xl px-4 py-3 shadow-sm`}>
-                                <p className="text-sm">{message.content}</p>
-                                <span className={`text-xs ${message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'} mt-1 block`}>
-                                  {message.time}
-                                </span>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-center py-12">
-                            <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                            <p className="text-gray-600 font-medium">Start a conversation with {selectedExpert.name}</p>
-                            <p className="text-sm text-gray-500 mt-1">Ask questions, request advice, or schedule a session</p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Message Input */}
-                      <div className="border-t border-gray-200 p-4 bg-white">
-                        <div className="flex items-end space-x-3">
-                          <textarea
-                            placeholder={`Ask ${selectedExpert.name} a question...`}
-                            className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                            rows={2}
-                          />
-                          <button className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition-colors">
-                            <Send className="w-5 h-5" />
-                          </button>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                          💡 Experts typically respond within 24-48 hours
-                        </p>
-                      </div>
+                      {/* Info Text */}
+                      <p className="text-xs text-gray-500 text-center mt-3">
+                        Clicking this button will search for <strong>{expert.name}</strong> on Microsoft Teams
+                      </p>
                     </div>
-                  ) : (
-                    <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl h-[600px] flex items-center justify-center">
-                      <div className="text-center">
-                        <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Select an Expert</h3>
-                        <p className="text-gray-600">Choose an expert from the list to view your conversation</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         )}
 
         {/* Ask the Expert Forum Tab */}
-        {activeTab === 'forum' && (
-          <div className="p-8 overflow-y-auto h-full">
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Ask the Expert - Chat History</h2>
-                <p className="text-gray-600 mt-1">View your ongoing conversations and past questions with experts</p>
-              </div>
-              <button
-                onClick={() => setShowAskModal(true)}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg text-sm font-semibold transition-all shadow-md hover:shadow-lg flex items-center space-x-2"
-              >
-                <MessageCircle className="w-5 h-5" />
-                <span>New Question</span>
-              </button>
-            </div>
-
-            {/* Expert Conversations List */}
-            {connectedExperts.length > 0 ? (
-              <div className="space-y-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                  <div className="flex items-center space-x-2 text-blue-900">
-                    <MessageCircle className="w-5 h-5" />
-                    <p className="font-medium">You have {connectedExperts.length} active expert conversations</p>
-                  </div>
-                </div>
-
-                {connectedExperts.map((expert) => {
-                  const conversation = expertConversations[expert.id] || [];
-                  const lastMessage = conversation[conversation.length - 1];
-                  const messageCount = conversation.length;
-
-                  return (
-                    <div
-                      key={expert.id}
-                      onClick={() => {
-                        setSelectedExpert(expert);
-                        setActiveTab('myExperts');
-                      }}
-                      className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer group"
-                    >
-                      <div className="flex items-start space-x-4">
-                        <div className="relative">
-                          <img
-                            src={expert.avatar}
-                            alt={expert.name}
-                            className="w-16 h-20 rounded-lg object-cover object-top shadow-md"
-                            style={{ aspectRatio: '4/5' }}
-                          />
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                                {expert.name}
-                              </h3>
-                              <p className="text-sm text-gray-600">{expert.title} • {expert.company}</p>
-                              <div className="flex items-center space-x-3 mt-1">
-                                <div className="flex items-center space-x-1">
-                                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                  <span className="text-sm font-medium text-gray-700">{expert.rating}</span>
-                                </div>
-                                <span className="text-sm text-gray-500">•</span>
-                                <span className="text-sm text-gray-500">{expert.reviewCount} reviews</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              {messageCount > 0 && (
-                                <span className="bg-blue-500 text-white text-xs rounded-full px-3 py-1 font-bold">
-                                  {messageCount} messages
-                                </span>
-                              )}
-                              <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                            </div>
-                          </div>
-
-                          {lastMessage && (
-                            <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                              <div className="flex items-start space-x-2">
-                                <MessageCircle className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-gray-700 mb-1">
-                                    {lastMessage.sender === 'user' ? 'You' : expert.name}:
-                                  </p>
-                                  <p className="text-sm text-gray-600 line-clamp-2">{lastMessage.content}</p>
-                                  <p className="text-xs text-gray-400 mt-1">{lastMessage.time}</p>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Expertise Tags */}
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            {expert.expertise.slice(0, 3).map((skill, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
-                              >
-                                {skill}
-                              </span>
-                            ))}
-                            {expert.expertise.length > 3 && (
-                              <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                +{expert.expertise.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Quick Actions */}
-                      <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
-                          <div className="flex items-center space-x-1">
-                            <MapPin className="w-4 h-4" />
-                            <span>{expert.location}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Clock className="w-4 h-4" />
-                            <span>Responds in 24-48h</span>
-                          </div>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedExpert(expert);
-                            setActiveTab('myExperts');
-                          }}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2"
-                        >
-                          <Send className="w-4 h-4" />
-                          <span>Continue Chat</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-                <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Expert Conversations Yet</h3>
-                <p className="text-gray-600 mb-6">Connect with experts to start asking questions and getting personalized advice</p>
-                <button
-                  onClick={() => setActiveTab('directory')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-                >
-                  Browse Experts
-                </button>
-              </div>
-            )}
-
-            {/* Expert Categories for Quick Access */}
-            <div className="mt-12">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Browse by Expertise</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <button
-                  onClick={() => setActiveTab('directory')}
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-4 hover:shadow-md transition-all text-left group"
-                >
-                  <div className="text-2xl mb-2">💼</div>
-                  <div className="font-semibold text-gray-900 mb-1">Tax & Regulatory</div>
-                  <div className="text-xs text-gray-600">Connect with tax experts</div>
-                </button>
-                <button
-                  onClick={() => setActiveTab('directory')}
-                  className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl p-4 hover:shadow-md transition-all text-left group"
-                >
-                  <div className="text-2xl mb-2">🌱</div>
-                  <div className="font-semibold text-gray-900 mb-1">ESG & Sustainability</div>
-                  <div className="text-xs text-gray-600">ESG guidance available</div>
-                </button>
-                <button
-                  onClick={() => setActiveTab('directory')}
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-4 hover:shadow-md transition-all text-left group"
-                >
-                  <div className="text-2xl mb-2">💳</div>
-                  <div className="font-semibold text-gray-900 mb-1">Fintech & Banking</div>
-                  <div className="text-xs text-gray-600">Financial experts ready</div>
-                </button>
-                <button
-                  onClick={() => setActiveTab('directory')}
-                  className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl p-4 hover:shadow-md transition-all text-left group"
-                >
-                  <div className="text-2xl mb-2">🤝</div>
-                  <div className="font-semibold text-gray-900 mb-1">M&A Advisory</div>
-                  <div className="text-xs text-gray-600">Deal experts online</div>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        
 
         {/* Access Requests Tab */}
         {activeTab === 'requests' && (
@@ -3177,8 +3041,17 @@ const ExpertDirectory: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => {
-                            if (emailInput.includes('@')) {
-                              addInvitedEmail(emailInput);
+                            console.log('📧 Add button clicked. emailInput:', emailInput);
+                            if (emailInput && emailInput.trim().length > 0) {
+                              if (emailInput.includes('@')) {
+                                addInvitedEmail(emailInput);
+                              } else {
+                                console.warn('⚠️ Email does not contain @ symbol');
+                                alert('Please enter a valid email address');
+                              }
+                            } else {
+                              console.warn('⚠️ Email input is empty');
+                              alert('Please enter an email address');
                             }
                           }}
                           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors"
