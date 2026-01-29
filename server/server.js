@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { getConnection } from './config/database.js';
 
 // Import routes
@@ -17,8 +19,10 @@ import opportunityRoutes from './routes/opportunities.js';
 import dashboardRoutes from './routes/dashboard.js';
 import preferencesRoutes from './routes/preferences.js';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from parent directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -47,6 +51,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Serve static files from React build
+const distPath = path.join(__dirname, '..', 'dist');
+app.use(express.static(distPath));
+
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.json({
@@ -69,12 +77,17 @@ app.use('/api/opportunities', opportunityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/preferences', preferencesRoutes);
 
-// 404 handler
-app.use('*', (req, res) => {
-    res.status(404).json({
-        success: false,
-        message: 'API endpoint not found'
-    });
+// Serve React app for all non-API routes (SPA routing)
+app.get('*', (req, res) => {
+    // Only serve index.html for non-API routes
+    if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(distPath, 'index.html'));
+    } else {
+        res.status(404).json({
+            success: false,
+            message: 'API endpoint not found'
+        });
+    }
 });
 
 // Global error handler
