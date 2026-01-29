@@ -104,17 +104,25 @@ app.use((error, req, res, next) => {
 // Database connection test and server start
 const startServer = async () => {
     try {
-        // Test database connection
-        console.log('🔌 Testing database connection...');
-        const pool = await getConnection();
-        console.log('✅ Database connected successfully!');
+        // Test database connection (optional - don't block startup if DB fails)
+        try {
+            console.log('🔌 Testing database connection...');
+            const pool = await getConnection();
+            console.log('✅ Database connected successfully!');
+            
+            // Simple connection test - just count tables
+            const result = await pool.request().query(`
+                SELECT COUNT(*) as table_count 
+                FROM INFORMATION_SCHEMA.TABLES 
+                WHERE TABLE_TYPE = 'BASE TABLE'
+            `);
+            console.log(`📊 Database has ${result.recordset[0].table_count} tables`);
+        } catch (dbError) {
+            console.warn('⚠️  Database connection failed (continuing in limited mode):', dbError.message);
+            console.log('💡 App will use demo mode for authentication endpoints');
+        }
         
-        // Query all users to prove connection
-        const result = await pool.request().query('SELECT user_id, email, full_name, role, created_at FROM Users');
-        console.log(`\n📊 Found ${result.recordset.length} users in database:`);
-        console.table(result.recordset);
-        
-        // Start server
+        // Start server regardless of database connection
         app.listen(PORT, () => {
             console.log(`\n🚀 One Africa Hub API server running on port ${PORT}`);
             console.log(`📊 Health check: http://localhost:${PORT}/health`);
