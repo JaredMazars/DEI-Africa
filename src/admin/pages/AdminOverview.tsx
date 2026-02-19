@@ -85,7 +85,7 @@ const AdminOverview: React.FC = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 xs:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
         {statCards.map((stat, idx) => {
           const Icon = stat.icon;
           return (
@@ -106,7 +106,7 @@ const AdminOverview: React.FC = () => {
 
       {/* Quick Actions */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl p-4 sm:p-6 text-white">
-        <h2 className="text-lg sm:text-xl font-bold mb-2">Welcome, Admin!</h2>
+        <h2 className="text-lg sm:text-xl font-bold mb-2 text-base text-white">Welcome, Admin!</h2>
         <p className="text-sm sm:text-base text-blue-100">
           You have full access to manage all platform features. Use the sidebar to navigate to different sections.
         </p>

@@ -68,11 +68,12 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const { isAuthenticated } = useSimpleAuth();
   const isAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+  const isPublicRoute = typeof window !== 'undefined' && ['/login', '/register', '/onboarding', '/verification-pending', '/verify-email'].includes(window.location.pathname);
   
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Show Navigation only when authenticated and not on admin routes */}
-      {isAuthenticated && !isAdminRoute && <Navigation />}
+      {/* Show Navigation only when authenticated and not on admin or public routes */}
+      {isAuthenticated && !isAdminRoute && !isPublicRoute && <Navigation />}
       
       <Routes>
         {/* Public Routes */}

@@ -53,7 +53,7 @@ const AdminLayout: React.FC = () => {
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-base font-bold">Admin Console</h1>
+              <h1 className="text-base text-white">Admin Console</h1>
               <p className="text-xs text-blue-200">DEI Africa Café</p>
             </div>
           </div>
@@ -89,7 +89,7 @@ const AdminLayout: React.FC = () => {
               <Shield className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-lg font-bold">Admin Console</h1>
+              <h1 className="text-base text-white">Admin Console</h1>
               <p className="text-xs text-blue-200">DEI Africa Café</p>
             </div>
           </div>
