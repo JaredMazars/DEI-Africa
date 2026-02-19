@@ -150,23 +150,23 @@ const AdminDashboard: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-blue-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-900 to-blue-900 text-white shadow-2xl">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="bg-white/20 backdrop-blur-lg rounded-xl p-3">
-                <Shield className="w-8 h-8" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="bg-white/20 backdrop-blur-lg rounded-xl p-2 sm:p-3">
+                <Shield className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-                <p className="text-blue-200 text-sm">DEI Africa Café Management</p>
+                <h1 className="text-xl sm:text-2xl font-bold">Admin Dashboard</h1>
+                <p className="text-blue-200 text-xs sm:text-sm">DEI Africa Café Management</p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg font-medium transition-colors"
+              className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm"
             >
               <LogOut className="w-4 h-4" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
