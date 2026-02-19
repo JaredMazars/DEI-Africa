@@ -176,7 +176,7 @@ const AdminCollaboration: React.FC = () => {
   );
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Collaboration Hub</h1>

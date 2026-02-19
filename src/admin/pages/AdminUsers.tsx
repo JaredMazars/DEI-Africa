@@ -94,15 +94,15 @@ const AdminUsers: React.FC = () => {
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-        <p className="text-gray-600 mt-1">Manage platform users and their access</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">User Management</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Manage platform users and their access</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {[
           { label: 'Total Users', value: stats.total, icon: Users, color: 'blue' },
           { label: 'Active', value: stats.active, icon: CheckCircle, color: 'green' },
@@ -111,35 +111,35 @@ const AdminUsers: React.FC = () => {
         ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={idx} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className={`inline-flex p-3 rounded-lg bg-${stat.color}-100 mb-3`}>
-                <Icon className={`w-6 h-6 text-${stat.color}-600`} />
+            <div key={idx} className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
+              <div className={`inline-flex p-2 sm:p-3 rounded-lg bg-${stat.color}-100 mb-2 sm:mb-3`}>
+                <Icon className={`w-5 h-5 sm:w-6 sm:h-6 text-${stat.color}-600`} />
               </div>
-              <p className="text-gray-600 text-sm">{stat.label}</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
+              <p className="text-gray-600 text-xs sm:text-sm">{stat.label}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
             </div>
           );
         })}
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by name or email..."
-              className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-9 sm:pl-11 pr-4 py-2.5 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           {/* Filter */}
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
