@@ -36,7 +36,6 @@ jobs:
           cp -r dist deploy/dist
           cp -r server deploy/server
           cp package.json deploy/package.json
-          cp web.config deploy/web.config
           cp startup.sh deploy/startup.sh
           # Remove stale Oryx manifest so Azure doesn't swap out node_modules
           rm -f deploy/oryx-manifest.toml
