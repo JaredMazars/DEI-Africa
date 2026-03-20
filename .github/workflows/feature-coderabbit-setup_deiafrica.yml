@@ -37,12 +37,16 @@ jobs:
           cp -r server deploy/server
           cp package.json deploy/package.json
           cp web.config deploy/web.config
+          # Remove stale Oryx manifest so Azure doesn't swap out node_modules
+          rm -f deploy/oryx-manifest.toml
+          # Zip to preserve server/node_modules (gitignore would strip them otherwise)
+          cd deploy && zip -r ../node-app.zip . && cd ..
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: deploy/
+          path: node-app.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -56,7 +60,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-          path: ./deploy
+          path: .
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -71,6 +75,6 @@ jobs:
         with:
           app-name: 'deiafrica'
           slot-name: 'Production'
-          package: ./deploy
+          package: node-app.zip
           startup-command: 'node server/server.js'
           
