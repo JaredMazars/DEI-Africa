@@ -37,6 +37,7 @@ jobs:
           cp -r server deploy/server
           cp package.json deploy/package.json
           cp web.config deploy/web.config
+          cp startup.sh deploy/startup.sh
           # Remove stale Oryx manifest so Azure doesn't swap out node_modules
           rm -f deploy/oryx-manifest.toml
           # Zip to preserve server/node_modules (gitignore would strip them otherwise)
@@ -76,5 +77,5 @@ jobs:
           app-name: 'deiafrica'
           slot-name: 'Production'
           package: node-app.zip
-          startup-command: 'node server/server.js'
+          startup-command: 'bash /home/site/wwwroot/startup.sh'
           
